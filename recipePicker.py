@@ -1,9 +1,14 @@
 import tkinter as tk
 from PIL import ImageTk
 import sqlite3
-from numpy import random, char
+from numpy import random
 
 bg_colour = "#3d6466"
+
+
+def clear_widgets(frame_in):
+    for widget in frame_in.winfo_children():
+        widget.destroy()
 
 
 def fetch_db():
@@ -27,7 +32,6 @@ def fetch_db():
 def pre_process(table_name, table_records):
     title = table_name[:-6]
     title = "".join([char if char.islower() else " " + char for char in title])
-    print(title)
 
     ingredients = []
 
@@ -38,12 +42,12 @@ def pre_process(table_name, table_records):
         unit = i[3]
         ingredients.append(qty + " " + unit + " " + name)
 
-    print(ingredients)
-
-
+    return title, ingredients
 
 
 def load_frame1():
+    clear_widgets(frame2)
+    frame1.tkraise()
     frame1.pack_propagate(False)
     # frame1 widgets
     logo_img = ImageTk.PhotoImage(file="assets/RRecipe_logo.png")
@@ -74,27 +78,59 @@ def load_frame1():
 
 
 def load_frame2():
+    clear_widgets(frame1)
+    frame2.tkraise()
     table_name, table_records = fetch_db()
-    pre_process(table_name, table_records)
+    title, ingredients = pre_process(table_name, table_records)
+
+    # frame2 widget
+    logo_img = ImageTk.PhotoImage(file="assets/RRecipe_logo_bottom.png")
+    logo_widget = tk.Label(frame2, image=logo_img, bg=bg_colour)
+    logo_widget.image = logo_img
+    logo_widget.pack(pady=20)
+
+    # Label widget
+    tk.Label(frame2,
+             text=title,
+             bg=bg_colour,
+             fg="white",
+             font=("TkHeadingFont", 20)
+             ).pack(pady=25)
+
+    for i in ingredients:
+        tk.Label(frame2,
+                 text=i,
+                 bg="#28393a",
+                 fg="white",
+                 font=("TkMenuFont", 12)
+                 ).pack(fill="both")
+
+    # Button Widget
+    tk.Button(
+        frame2,
+        text="BACK",
+        font=("TkHeadingFont", 18),
+        bg="#28393a",
+        fg="black",
+        cursor="hand2",
+        activebackground="#badee2",
+        activeforeground="white",
+        command=lambda: load_frame1()
+    ).pack(pady=20)
 
 
 # initialize app
 root = tk.Tk()
 root.title("Recipe Picker")
-# root.eval("tk::PlaceWindow . center")
-x = root.winfo_screenwidth() // 2
-y = int(root.winfo_screenheight() * 0.1)
-root.geometry('500x600+' + str(x) + '+' + str(y))
+root.eval("tk::PlaceWindow . center")
 
 # Create frame widget
 frame1 = tk.Frame(root, width=500, height=600, bg=bg_colour)
 frame2 = tk.Frame(root, bg=bg_colour)
 
 for frame in (frame1, frame2):
-    frame.grid(row=0, column=0)
+    frame.grid(row=0, column=0, sticky="nesw")
 
-
+# Start app
 load_frame1()
-
-# run app
 root.mainloop()
