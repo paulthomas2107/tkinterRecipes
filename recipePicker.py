@@ -1,7 +1,10 @@
+import os
+import sys
 import tkinter as tk
 from PIL import ImageTk
 import sqlite3
 from numpy import random
+
 
 bg_colour = "#3d6466"
 
